@@ -1,130 +1,267 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Registro de Presença</title>
 
-  <style>
-    body{
-      font-family: Arial, sans-serif;
-      background:#f4f4f4;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      min-height:100vh;
-      margin:0;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    .container{
-      background:white;
-      padding:30px;
-      border-radius:12px;
-      width:90%;
-      max-width:420px;
-      box-shadow:0 0 15px rgba(0,0,0,0.1);
-    }
+<title>Registro de Presença USP</title>
 
-    h2{
-      text-align:center;
-      margin-bottom:20px;
-      color:#333;
-    }
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
-    input, button{
-      width:100%;
-      padding:12px;
-      margin-top:10px;
-      border-radius:8px;
-      border:1px solid #ccc;
-      font-size:16px;
-      box-sizing:border-box;
-    }
+<style>
 
-    button{
-      background:#0066ff;
-      color:white;
-      border:none;
-      cursor:pointer;
-      font-weight:bold;
-    }
+body{
+    margin:0;
+    padding:0;
+    font-family:Arial, sans-serif;
+    background:#f3f6fb;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
 
-    button:hover{
-      background:#0052cc;
-    }
+.container{
+    background:white;
+    width:90%;
+    max-width:420px;
+    padding:30px;
+    border-radius:16px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
 
-    .status{
-      margin-top:15px;
-      text-align:center;
-      font-weight:bold;
-    }
+.logo{
+    text-align:center;
+    margin-bottom:15px;
+}
 
-    .loading{
-      color:orange;
-    }
+.logo img{
+    width:120px;
+}
 
-    .success{
-      color:green;
-    }
+h2{
+    text-align:center;
+    color:#333;
+    margin-bottom:20px;
+}
 
-    .error{
-      color:red;
-    }
-  </style>
+input, button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    font-size:16px;
+    box-sizing:border-box;
+}
+
+button{
+    background:#990000;
+    color:white;
+    border:none;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#770000;
+}
+
+.status{
+    margin-top:15px;
+    text-align:center;
+    font-weight:bold;
+}
+
+.success{
+    color:green;
+}
+
+.error{
+    color:red;
+}
+
+.loading{
+    color:orange;
+}
+
+#formArea{
+    display:none;
+}
+
+#userInfo{
+    text-align:center;
+    margin-bottom:15px;
+    color:#444;
+    font-size:14px;
+}
+
+</style>
+
 </head>
+
 <body>
 
 <div class="container">
 
-  <h2>Registro de Presença</h2>
+    <div class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/USP_logo.svg">
+    </div>
 
-  <form id="presencaForm">
+    <h2>Registro de Presença</h2>
 
-    <input
-      type="text"
-      id="nome"
-      placeholder="Nome Completo"
-      required
-    />
+    <!-- LOGIN GOOGLE -->
 
-      <input
-      type="text"
-      id="matricula"
-      placeholder="Matrícula"
-      required
-    />
+    <div id="loginArea">
 
-    <button type="submit">
-      Registrar Presença
-    </button>
+        <div
+            id="g_id_onload"
+            data-client_id="479212636225-4ifb7bgvfkmrlakfmn8ohfu5ku8u4ger.apps.googleusercontent.com"
+            data-callback="handleCredentialResponse">
+        </div>
 
-  </form>
+        <div
+            class="g_id_signin"
+            data-type="standard"
+            data-size="large"
+            data-theme="outline"
+            data-text="sign_in_with"
+            data-shape="rectangular"
+            data-logo_alignment="left">
+        </div>
 
-  <div class="status" id="status"></div>
+    </div>
+
+    <!-- FORMULÁRIO -->
+
+    <div id="formArea">
+
+        <div id="userInfo"></div>
+
+        <form id="presencaForm">
+
+            <input
+                type="text"
+                id="nome"
+                placeholder="Nome Completo"
+                required
+            />
+
+            <input
+                type="text"
+                id="matricula"
+                placeholder="Matrícula"
+                required
+            />
+
+            <button type="submit">
+                Registrar Presença
+            </button>
+
+        </form>
+
+    </div>
+
+    <div class="status" id="status"></div>
 
 </div>
 
 <script>
 
-  // ============================
-  // CONFIGURAÇÕES
-  // ============================
+// ====================================
+// URL DO APPS SCRIPT
+// ====================================
 
-  // COLE AQUI SUA URL DO APPS SCRIPT
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTeaMAtY7kV4_DbC0Sf_K9X7sQF3yyWNHhwsKRu3QuWInTR50CdK1nYdqsilgSlE4a/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTeaMAtY7kV4_DbC0Sf_K9X7sQF3yyWNHhwsKRu3QuWInTR50CdK1nYdqsilgSlE4a/exec";
 
-  // Coordenadas da instituição
-  const LAT_ESCOLA = -21.2428;
-  const LNG_ESCOLA = -47.8384;
+// ====================================
+// LOCALIZAÇÃO DA INSTITUIÇÃO
+// ====================================
 
-  // Distância máxima permitida em metros
-  const DISTANCIA_MAXIMA = 100;
+const LAT_ESCOLA = -21.2428;
+const LNG_ESCOLA = -47.8384;
 
-  // ============================
-  // FUNÇÃO DISTÂNCIA GPS
-  // ============================
+const DISTANCIA_MAXIMA = 100;
 
-  function calcularDistancia(lat1, lon1, lat2, lon2){
+let usuarioEmail = "";
+
+// ====================================
+// LOGIN GOOGLE
+// ====================================
+
+function handleCredentialResponse(response){
+
+    const data = parseJwt(response.credential);
+
+    usuarioEmail = data.email;
+
+    // ====================================
+    // VALIDA DOMÍNIOS
+    // ====================================
+
+    if(
+        !usuarioEmail.endsWith("@usp.br") &&
+        !usuarioEmail.endsWith("@ee.ufcg.edu.br")
+    ){
+
+        document.getElementById("status").className =
+            "status error";
+
+        document.getElementById("status").innerText =
+            "Use um e-mail institucional autorizado.";
+
+        return;
+    }
+
+    // MOSTRA FORMULÁRIO
+
+    document.getElementById("loginArea").style.display =
+        "none";
+
+    document.getElementById("formArea").style.display =
+        "block";
+
+    document.getElementById("userInfo").innerHTML =
+        "Logado como:<br><b>" + usuarioEmail + "</b>";
+}
+
+// ====================================
+// DECODIFICAR TOKEN GOOGLE
+// ====================================
+
+function parseJwt(token) {
+
+    const base64Url = token.split('.')[1];
+
+    const base64 = base64Url
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+
+    const jsonPayload = decodeURIComponent(
+
+        atob(base64)
+        .split('')
+        .map(function(c) {
+
+            return '%' +
+                ('00' + c.charCodeAt(0).toString(16))
+                .slice(-2);
+
+        })
+        .join('')
+
+    );
+
+    return JSON.parse(jsonPayload);
+}
+
+// ====================================
+// CALCULAR DISTÂNCIA GPS
+// ====================================
+
+function calcularDistancia(lat1, lon1, lat2, lon2){
 
     const R = 6371e3;
 
@@ -135,108 +272,130 @@
     const Δλ = (lon2-lon1) * Math.PI/180;
 
     const a =
-      Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-      Math.cos(φ1) * Math.cos(φ2) *
-      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+        Math.cos(φ1) * Math.cos(φ2) *
+        Math.sin(Δλ/2) * Math.sin(Δλ/2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
     return R * c;
-  }
+}
 
-  // ============================
-  // ENVIO FORMULÁRIO
-  // ============================
+// ====================================
+// ENVIO FORMULÁRIO
+// ====================================
 
-  document.getElementById("presencaForm")
-    .addEventListener("submit", async function(e){
+document.getElementById("presencaForm")
+.addEventListener("submit", async function(e){
 
     e.preventDefault();
 
     const status = document.getElementById("status");
 
     status.className = "status loading";
-    status.innerText = "Capturando localização...";
 
-    const nome = document.getElementById("nome").value;
-    const matricula = document.getElementById("matricula").value;
+    status.innerText =
+        "Capturando localização...";
 
-    // Captura GPS
+    const nome =
+        document.getElementById("nome").value;
+
+    const matricula =
+        document.getElementById("matricula").value;
+
     navigator.geolocation.getCurrentPosition(
 
-      async function(position){
+        async function(position){
 
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
+            const latitude =
+                position.coords.latitude;
 
-        // Calcula distância
-        const distancia = calcularDistancia(
-          LAT_ESCOLA,
-          LNG_ESCOLA,
-          latitude,
-          longitude
-        );
+            const longitude =
+                position.coords.longitude;
 
-        // Validação
-        if(distancia > DISTANCIA_MAXIMA){
+            const distancia = calcularDistancia(
+                LAT_ESCOLA,
+                LNG_ESCOLA,
+                latitude,
+                longitude
+            );
 
-          status.className = "status error";
+            // ====================================
+            // VALIDA DISTÂNCIA
+            // ====================================
 
-          status.innerHTML =
-            "Você está fora da área permitida.<br>" +
-            "Distância detectada: " +
-            Math.round(distancia) + " metros.";
+            if(distancia > DISTANCIA_MAXIMA){
 
-          return;
+                status.className = "status error";
+
+                status.innerHTML =
+                    "Você está fora da área permitida.<br>" +
+                    "Distância detectada: " +
+                    Math.round(distancia) +
+                    " metros.";
+
+                return;
+            }
+
+            status.innerText =
+                "Enviando presença...";
+
+            const dados = {
+
+                nome,
+                email: usuarioEmail,
+                matricula,
+                latitude,
+                longitude,
+                horario: new Date().toLocaleString()
+
+            };
+
+            try{
+
+                await fetch(SCRIPT_URL,{
+
+                    method:"POST",
+
+                    body: JSON.stringify(dados)
+
+                });
+
+                status.className =
+                    "status success";
+
+                status.innerHTML =
+                    "Presença registrada com sucesso!";
+
+                document
+                    .getElementById("presencaForm")
+                    .reset();
+
+            }catch(error){
+
+                status.className =
+                    "status error";
+
+                status.innerText =
+                    "Erro ao enviar presença.";
+
+            }
+
+        },
+
+        function(){
+
+            status.className =
+                "status error";
+
+            status.innerText =
+                "Permita acesso à localização.";
+
         }
-
-        status.innerText = "Enviando presença...";
-
-        // Dados enviados
-        
-          const dados = {
-            nome,
-            matricula,
-            latitude,
-            longitude,
-            horario: new Date().toLocaleString()
-          };
-
-        try{
-
-          await fetch(SCRIPT_URL, {
-            method: "POST",
-            body: JSON.stringify(dados)
-          });
-
-          status.className = "status success";
-
-          status.innerHTML =
-            "Presença registrada com sucesso!";
-
-          document.getElementById("presencaForm").reset();
-
-        }catch(error){
-
-          status.className = "status error";
-
-          status.innerText =
-            "Erro ao enviar presença.";
-        }
-
-      },
-
-      function(){
-
-        status.className = "status error";
-
-        status.innerText =
-          "Permita acesso à localização.";
-      }
 
     );
 
-  });
+});
 
 </script>
 
