@@ -87,14 +87,7 @@
       required
     />
 
-    <input
-      type="email"
-      id="email"
-      placeholder="E-mail"
-      required
-    />
-
-    <input
+      <input
       type="text"
       id="matricula"
       placeholder="Matrícula"
@@ -166,7 +159,6 @@
     status.innerText = "Capturando localização...";
 
     const nome = document.getElementById("nome").value;
-    const email = document.getElementById("email").value;
     const matricula = document.getElementById("matricula").value;
 
     // Captura GPS
@@ -201,14 +193,14 @@
         status.innerText = "Enviando presença...";
 
         // Dados enviados
-        const dados = {
-          nome,
-          email,
-          matricula,
-          latitude,
-          longitude,
-          horario: new Date().toLocaleString()
-        };
+        
+          const dados = {
+            nome,
+            matricula,
+            latitude,
+            longitude,
+            horario: new Date().toLocaleString()
+          };
 
         try{
 
