@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro de Presença</title>
+
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      background:#f4f4f4;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+      margin:0;
+    }
+
+    .container{
+      background:white;
+      padding:30px;
+      border-radius:12px;
+      width:90%;
+      max-width:420px;
+      box-shadow:0 0 15px rgba(0,0,0,0.1);
+    }
+
+    h2{
+      text-align:center;
+      margin-bottom:20px;
+      color:#333;
+    }
+
+    input, button{
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      border-radius:8px;
+      border:1px solid #ccc;
+      font-size:16px;
+      box-sizing:border-box;
+    }
+
+    button{
+      background:#0066ff;
+      color:white;
+      border:none;
+      cursor:pointer;
+      font-weight:bold;
+    }
+
+    button:hover{
+      background:#0052cc;
+    }
+
+    .status{
+      margin-top:15px;
+      text-align:center;
+      font-weight:bold;
+    }
+
+    .loading{
+      color:orange;
+    }
+
+    .success{
+      color:green;
+    }
+
+    .error{
+      color:red;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <h2>Registro de Presença</h2>
+
+  <form id="presencaForm">
+
+    <input
+      type="text"
+      id="nome"
+      placeholder="Nome Completo"
+      required
+    />
+
+    <input
+      type="email"
+      id="email"
+      placeholder="E-mail"
+      required
+    />
+
+    <input
+      type="text"
+      id="matricula"
+      placeholder="Matrícula"
+      required
+    />
+
+    <button type="submit">
+      Registrar Presença
+    </button>
+
+  </form>
+
+  <div class="status" id="status"></div>
+
+</div>
+
+<script>
+
+  // ============================
+  // CONFIGURAÇÕES
+  // ============================
+
+  // COLE AQUI SUA URL DO APPS SCRIPT
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTeaMAtY7kV4_DbC0Sf_K9X7sQF3yyWNHhwsKRu3QuWInTR50CdK1nYdqsilgSlE4a/exec";
+
+  // Coordenadas da instituição
+  const LAT_ESCOLA = -21.1767;
+  const LNG_ESCOLA = -47.8208;
+
+  // Distância máxima permitida em metros
+  const DISTANCIA_MAXIMA = 100;
+
+  // ============================
+  // FUNÇÃO DISTÂNCIA GPS
+  // ============================
+
+  function calcularDistancia(lat1, lon1, lat2, lon2){
+
+    const R = 6371e3;
+
+    const φ1 = lat1 * Math.PI/180;
+    const φ2 = lat2 * Math.PI/180;
+
+    const Δφ = (lat2-lat1) * Math.PI/180;
+    const Δλ = (lon2-lon1) * Math.PI/180;
+
+    const a =
+      Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+      Math.cos(φ1) * Math.cos(φ2) *
+      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    return R * c;
+  }
+
+  // ============================
+  // ENVIO FORMULÁRIO
+  // ============================
+
+  document.getElementById("presencaForm")
+    .addEventListener("submit", async function(e){
+
+    e.preventDefault();
+
+    const status = document.getElementById("status");
+
+    status.className = "status loading";
+    status.innerText = "Capturando localização...";
+
+    const nome = document.getElementById("nome").value;
+    const email = document.getElementById("email").value;
+    const matricula = document.getElementById("matricula").value;
+
+    // Captura GPS
+    navigator.geolocation.getCurrentPosition(
+
+      async function(position){
+
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        // Calcula distância
+        const distancia = calcularDistancia(
+          LAT_ESCOLA,
+          LNG_ESCOLA,
+          latitude,
+          longitude
+        );
+
+        // Validação
+        if(distancia > DISTANCIA_MAXIMA){
+
+          status.className = "status error";
+
+          status.innerHTML =
+            "Você está fora da área permitida.<br>" +
+            "Distância detectada: " +
+            Math.round(distancia) + " metros.";
+
+          return;
+        }
+
+        status.innerText = "Enviando presença...";
+
+        // Dados enviados
+        const dados = {
+          nome,
+          email,
+          matricula,
+          latitude,
+          longitude,
+          horario: new Date().toLocaleString()
+        };
+
+        try{
+
+          await fetch(SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify(dados)
+          });
+
+          status.className = "status success";
+
+          status.innerHTML =
+            "Presença registrada com sucesso!";
+
+          document.getElementById("presencaForm").reset();
+
+        }catch(error){
+
+          status.className = "status error";
+
+          status.innerText =
+            "Erro ao enviar presença.";
+        }
+
+      },
+
+      function(){
+
+        status.className = "status error";
+
+        status.innerText =
+          "Permita acesso à localização.";
+      }
+
+    );
+
+  });
+
+</script>
+
+</body>
+</html>
