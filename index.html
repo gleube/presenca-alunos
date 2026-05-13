@@ -371,15 +371,17 @@ document.getElementById("presencaForm")
                     .getElementById("presencaForm")
                     .reset();
 
-            }catch(error){
+           }catch(error){
 
-                status.className =
-                    "status error";
+    console.error(error);
 
-                status.innerText =
-                    "Erro ao enviar presença.";
+    status.className =
+        "status error";
 
-            }
+    status.innerText =
+        "Erro ao enviar presença: " + error;
+
+}
 
         },
 
