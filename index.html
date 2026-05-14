@@ -361,7 +361,7 @@ document.getElementById("presencaForm")
 
             try{
 
-               await fetch(SCRIPT_URL, {
+              const resposta = await fetch(SCRIPT_URL, {
 
     method: "POST",
 
@@ -370,6 +370,16 @@ document.getElementById("presencaForm")
     headers: {
         "Content-Type": "text/plain"
     },
+
+    body: JSON.stringify(dados)
+
+});
+
+status.className =
+    "status success";
+
+status.innerHTML =
+    "Presença registrada com sucesso!";
 
     body: JSON.stringify(dados)
 
